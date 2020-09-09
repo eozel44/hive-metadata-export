@@ -1,0 +1,21 @@
+#!/bin/bash
+rm -f TableNames.txt
+rm -f HiveTableDDL.txt
+rm -f AlterTableDDL.txt
+hive -e "use $1; show tables;" > TableNames.txt  
+sed -i '/^WARN/d' ./TableNames.txt
+wait
+cat TableNames.txt |while read LINE
+   do
+   hive -e "show create table $1.$LINE" >>HiveTableDDL.txt
+   sed -i '/^WARN/d' ./HiveTableDDL.txt
+   sed -i '/^LOCATION/,/hdfs/d' ./HiveTableDDL.txt
+   sed -i '/^TBLPROPERTIES/,/transient_lastDdlTime/d' ./HiveTableDDL.txt
+   echo  -e ";" >>HiveTableDDL.txt
+   echo  -e "\n" >> HiveTableDDL.txt
+
+   echo  -e "ALTER TABLE $1.$LINE SET TBLPROPERTIES('orc.compress'='SNAPPY');" >>AlterTableDDL.txt
+   echo  -e "\n" >>AlterTableDDL.txt
+   done
+--rm -f tableNames.txt
+echo "Table DDL generated"
