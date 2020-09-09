@@ -1,2 +1,2 @@
 # hivemetadataexport
-hivemetadataexport
+hive metadata export
